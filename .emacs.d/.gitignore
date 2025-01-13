@@ -1,4 +1,8 @@
 *
-!*.el
 !.gitignore
-private.el
+!straight
+!straight/versions
+!straight/versions/*
+!lisp
+!lisp/*
+lisp/private.el

@@ -22,11 +22,11 @@
               after-focus-change-function
               (lambda () (unless (frame-focus-state) (garbage-collect))))
 
-(add-to-list 'load-path (expand-file-name user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-(let ((private-file (locate-file "private.el" load-path)))
-	(when (file-exists-p private-file)
-		(load private-file)))
+(condition-case nil
+		(load "private")
+	(file-error (message "No private.el found")))
 
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 (load custom-file)
