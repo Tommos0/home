@@ -962,6 +962,9 @@ then reports them by calling REPORT-FN."
  (evil-define-key 'insert eat-line-mode-map (kbd "C-p") 'eat-line-previous-input)
  (evil-define-key 'insert eat-line-mode-map (kbd "C-n") 'eat-line-next-input)
  (setq eat-enable-auto-line-mode t)
+ :hook
+ (eat-eshell-mode . (lambda () (setq-local eshell-visual-commands nil)))
+ (eshell-mode . eat-eshell-mode)
  :bind
  (:map eat-line-mode-map
 			 ("C-k" . eat-previous-shell-prompt)
@@ -996,4 +999,3 @@ This command changes that sequence to just one line break."
 	(define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer"))))
 ;;; init.el ends here
 
-(use-package sticky-scroll-mode)
