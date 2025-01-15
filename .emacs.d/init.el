@@ -159,7 +159,16 @@
   (:map evil-insert-state-map ("C-k" . nil))
   (:map evil-insert-state-map ("C-j" . nil))
   (:map evil-normal-state-map ("M-." . nil))
+  (:map global-map ("C-@" . nil))
+  (:map global-map ("C-SPC" . nil))
   :config
+  (evil-define-key 'insert 'global (kbd "C-SPC") nil)
+  (evil-define-key 'insert 'global (kbd "C-@") nil)
+  (evil-set-leader 'insert (kbd "C-SPC"))
+  (evil-set-leader 'normal (kbd "SPC"))
+  (evil-define-key '(normal insert) 'global (kbd "<leader>u") 'universal-argument)
+  ;;(define-key global-map (kbd "<leader>P") 'safe-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>s") 'safe-buffer)
   (defun evil-jump-backward-same-file (&optional count) (interactive)
          (let ((evil-jumps-cross-buffers nil))
            (evil-jump-backward count)))
@@ -168,9 +177,7 @@
            (evil-jump-forward count)))
   (evil-define-key 'normal 'global (kbd "C-S-o") 'evil-jump-backward-same-file)
   (evil-define-key 'normal 'global (kbd "C-S-i") 'evil-jump-forward-same-file)
-  ;; use evil normal mode in 'rcirc' mode
   (evil-set-initial-state 'rcirc-mode 'normal)
-  ;; (evil-set-initial-state 'rcirc-mode 'emacs)
   (evil-mode 1))
 
 
@@ -246,7 +253,7 @@
 ;;  '((sql . t)))
 
 (use-package ob-sql-mode)
-(require 'ob-sql-mode)
+;;(require 'ob-sql-mode)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -437,9 +444,7 @@
         ("C-s" . consult-completion-at-point)
         ("TAB" . company-complete))
   (:map evil-insert-state-map
-        ("C-c SPC" . company-complete)
-        ("C-SPC" . company-complete)
-        ("C-@" . company-complete)))
+        ("C-c SPC" . company-complete)))
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
@@ -734,7 +739,7 @@
        ("C-j" . eat-next-shell-prompt)))
 
 (defun cleanup-windows-paste ()
-  "When pasting through a terminal from windows, you'd expect CRLF endings,
+  "When pasting through a terminal from windows, you'd expect CRLF endings.
 But I'm seeing CRHTCR (\\n\\t\\n).
 This command changes that sequence to just one line break."
   (interactive)
