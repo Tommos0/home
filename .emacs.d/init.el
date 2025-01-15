@@ -25,8 +25,8 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
 (condition-case nil
-		(load "private")
-	(file-error (message "No private.el found")))
+    (load "private")
+  (file-error (message "No private.el found")))
 
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 (load custom-file)
@@ -102,6 +102,7 @@
 (bind-key "C-\\" #'universal-argument)
 (put 'narrow-to-region 'disabled nil)
 (setq visible-bell 1)
+(setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 (setq-default css-indent-offset 2)
 (setq async-shell-command-buffer 'new-buffer)
@@ -109,66 +110,43 @@
 (use-package project)
 ;;;; Terminal optimizations
 (use-package evil-terminal-cursor-changer
-	:config
-	(evil-terminal-cursor-changer-activate))
+  :config
+  (evil-terminal-cursor-changer-activate))
 
 (use-package clipetty
-	:config
-	(global-clipetty-mode))
+  :config
+  (global-clipetty-mode))
+
 ;;;; Theme
 (use-package gruvbox-theme
   :custom-face
   (highlight ((t (:background "#4e463f"))))
-  (error ((t (:underline t))))
-  (warning ((t (:underline t))))
-  (font-lock-warning-face ((t (:underline t))))
-	(font-lock-keyword-face ((t (:foreground "#cc49ee"))))
-	(match ((t (:background "darkorange"))))
+  (error ((t (:foreground nil :background "#660000" :underline t))))
+  (warning ((t (:foreground nil :background "#793101" :underline t))))
+  (default ((t (:background "#282828"))))
+  (match ((t (:background "darkorange"))))
+  (auto-dim-other-buffers ((t (:background "#1e1e1e"))))
+  (auto-dim-other-buffers-hide ((t (:background "#1e1e1e"))))
   :init
   (load-theme 'gruvbox-dark-medium t))
 
-(set-face-attribute 'error nil :foreground nil :background "#660000")
-(set-face-attribute 'warning nil :foreground nil :background "#793101")
-;(set-face-attribute 'flymake-warning nil :foreground nil :background "#793101")
-(set-face-attribute 'default nil :background "#303030")
-(set-face-attribute 'font-lock-comment-face nil :foreground "#8F8F8F")
-(set-face-attribute 'line-number nil :foreground "#777777")
-(set-face-attribute 'default nil :family "Liberation Mono" :height 96)
-;(set-face-attribute 'default nil :family "Fira Code" :height 105)
-;(set-face-attribute 'default nil :family "Hack" :height 105)
-;(set-face-attribute 'default nil :family "DejaVu Mono" :height 105)
-(custom-set-faces
-    '(error ((t (:underline t)))))
+;;(set-face-attribute 'default nil :family "Liberation Mono" :height 96)
+;;(set-face-attribute 'default nil :family "Fira Code" :height 105)
+;;(set-face-attribute 'default nil :family "Hack" :height 105)
+;;(set-face-attribute 'default nil :family "DejaVu Mono" :height 105)
 
 (use-package auto-dim-other-buffers
-	 ;;:after doom-themes
-	 :after gruvbox-theme
-	 :config
-	 (defun darken-color (color amount)
-		 (let* ((rgb (color-name-to-rgb color))
-						(red   (* (nth 0 rgb) amount))
-						(green (* (nth 1 rgb) amount))
-						(blue  (* (nth 2 rgb) amount)))
-			 (color-rgb-to-hex red green blue 2)))
-	 (defun auto-dim-set-face-attributes ()
-		 (interactive)
-		 (let ((dimmed-color (darken-color (face-attribute 'default :background) .8))
-					 (faces (delete-dups (mapcar 'cadr auto-dim-other-buffers-affected-faces))))
-			 (dolist (face faces)
-				 (set-face-attribute face nil :background dimmed-color))))	
-	 (auto-dim-other-buffers-mode)
-	 (auto-dim-set-face-attributes))
+  :config
+  (auto-dim-other-buffers-mode))
 
 (noop
  (use-package all-the-icons
-	 :if (display-graphic-p))
+   :if (display-graphic-p))
  (use-package all-the-icons-dired
-	 :hook (dired-mode . all-the-icons-dired-mode))
+   :hook (dired-mode . all-the-icons-dired-mode))
  (use-package all-the-icons-completion
-	 :hook
-	 (marginalia-mode . all-the-icons-completion-marginalia-setup)))
-
-;; (use-package nerd-icons)
+   :hook
+   (marginalia-mode . all-the-icons-completion-marginalia-setup)))
 
 ;;;; Evil
 (use-package evil
@@ -208,9 +186,9 @@
 (use-package evil-cleverparens
   :hook
   (emacs-lisp-mode . evil-cleverparens-mode)
-	:config
-	;; fixes mess created by alt-tabbing to KITTY window (insert M-[ key somehow).
-	(evil-define-key 'normal evil-cleverparens-mode-map (kbd "M-[") nil))
+  :config
+  ;; fixes mess created by alt-tabbing to KITTY window (insert M-[ key somehow).
+  (evil-define-key 'normal evil-cleverparens-mode-map (kbd "M-[") nil))
 
 (use-package evil-surround
   :custom
@@ -235,11 +213,11 @@
   (global-git-gutter-mode t))
 
 (use-package git-timemachine
-	:straight (git-timemachine
-						 :type git
-						 :host github
-						 :repo "emacsmirror/git-timemachine"
-						 :branch "master"))
+  :straight (git-timemachine
+             :type git
+             :host github
+             :repo "emacsmirror/git-timemachine"
+             :branch "master"))
 
 (use-package browse-at-remote
   :config
@@ -256,28 +234,12 @@
   (evil-define-key 'motion org-mode-map "TAB" nil)
   (with-eval-after-load 'evil-maps (define-key evil-motion-state-map (kbd "TAB") nil))
   (setq org-startup-indented t))
+
 (define-derived-mode typescript-mode typescript-ts-mode "typescript")
 (define-derived-mode json-mode json-ts-mode "json")
 
 (require 'ob-shell)
 (use-package org-download)
-(use-package ob-mermaid
-  :custom
-  (ob-mermaid-cli-path "/home/tomk/.nvm/versions/node/v18.13.0/bin/mmdc")
-  :config
-  (org-babel-do-load-languages
-	'org-babel-load-languages
-	'((mermaid . t))))
-
-(require 'org-protocol)
-
-(setq org-capture-templates
-      '(("b"
-         "Bookmark"
-         entry
-         (file+headline "~/git/ah/bookmarks.org" "Bookmarks")
-         "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n"
-         :empty-lines 1)))
 
 ;; (org-babel-do-load-languages
 ;;  'org-babel-load-languages
@@ -292,7 +254,7 @@
 
 ;;;; Minibuffer
 (use-package vertico
-	:after (evil)
+  :after (evil)
   :init
   (vertico-mode)
   :custom
@@ -326,45 +288,11 @@
 ;;;; LLM
 (use-package gptel
   :straight (gptel
-	           :type git
-	           :host github
-	           :repo "karthink/gptel"
-	           :branch "master"))
+             :type git
+             :host github
+             :repo "karthink/gptel"
+             :branch "master"))
 
-(setq llm/refactor-directive "You are a code assistant.
-Respond concisely, with code only, without any additional text, prompt or note.")
-(setq llm/refactor-prompts '("Add elaborate comments."))
-(defun llm/clear-markdown-code-tags (str)
-	(replace-regexp-in-string "^```.*\n?" "" str))
-(defun llm/refactor (bounds prompt)
-  (interactive
-   (list
-    (cons (region-beginning) (region-end))
-		(completing-read "Choose: " llm/refactor-prompts nil nil nil 'refactor-hist)))
-	(llm/rewrite-and-replace bounds llm/refactor-directive prompt))
-(defun llm/rewrite-and-replace (bounds directive prompt)
-  (let ((gptel-model "gpt-4-turbo-preview"))
-	  (gptel-request
-			  (concat prompt "\n\n" (buffer-substring-no-properties (car bounds) (cdr bounds)))
-		  :system directive
-		  :buffer (current-buffer)
-		  :context (cons (set-marker (make-marker) (car bounds))
-									   (set-marker (make-marker) (cdr bounds)))
-		  :callback
-		  (lambda (response info)
-			  (if (not response)
-					  (message "ChatGPT response failed with: %s" (plist-get info :status))
-				  (let* ((bounds (plist-get info :context))
-							   (beg (car bounds))
-							   (end (cdr bounds))
-							   (buf (plist-get info :buffer)))
-					  (with-current-buffer buf
-						  (save-excursion
-							  (goto-char beg)
-							  (kill-region beg end)
-							  (insert (llm/clear-markdown-code-tags response))
-							  (set-marker beg nil)
-							  (set-marker end nil)))))))))
 ;;;; Packages
 (use-package recentf
   :ensure nil
@@ -374,23 +302,18 @@ Respond concisely, with code only, without any additional text, prompt or note."
   (recentf-max-saved-items 25000)
   (recentf-max-menu-items 25))
 
-
 (use-package dumb-jump)
+
 (use-package treesit-auto
   :config
   (global-treesit-auto-mode))
+
 (use-package yasnippet
-	:config
-	(defun my/capitalize-first-char (&optional string)
-		"Capitalize only the first character of the input STRING."
-		(when (and string (> (length string) 0))
-			(let ((first-char (substring string nil 1))
-						(rest-str   (substring string 1)))
-				(concat (capitalize first-char) rest-str))))
-	(yas-global-mode t))
+  :config
+  (yas-global-mode t))
 
 (use-package eglot
-	:straight nil
+  :straight nil
   :ensure nil
   :custom
   (eglot-confirm-server-initiated-edits nil)
@@ -419,10 +342,10 @@ Respond concisely, with code only, without any additional text, prompt or note."
 (use-package eglot-booster
   ;https://github.com/jdtsmith/eglot-booster
   :straight (eglot-booster
-						 :type git
-						 :host github
-						 :repo "jdtsmith/eglot-booster"
-						 :branch "main")
+             :type git
+             :host github
+             :repo "jdtsmith/eglot-booster"
+             :branch "main")
   :after eglot
   :config (eglot-booster-mode))
 
@@ -430,9 +353,9 @@ Respond concisely, with code only, without any additional text, prompt or note."
   :ensure nil
   :bind
   (:map flymake-mode-map
-	("C-c ! l" . flymake-show-buffer-diagnostics)
-	("C-c ! p" . flymake-goto-prev-error)
-	("C-c ! n" . flymake-goto-next-error))
+  ("C-c ! l" . flymake-show-buffer-diagnostics)
+  ("C-c ! p" . flymake-goto-prev-error)
+  ("C-c ! n" . flymake-goto-next-error))
   :config
   (add-hook 'prog-mode-hook 'flymake-mode))
 
@@ -469,11 +392,11 @@ Respond concisely, with code only, without any additional text, prompt or note."
     (interactive)
     (consult-find default-directory))
 
- 	(defun consult-completion-at-point ()
-		"completion-at-point with consult"
-		(interactive)
-		(let ((completion-in-region-function #'consult-completion-in-region))
-			(completion-at-point)))
+   (defun consult-completion-at-point ()
+    "completion-at-point with consult"
+    (interactive)
+    (let ((completion-in-region-function #'consult-completion-in-region))
+      (completion-at-point)))
 
   :config
   (evil-define-key 'insert eat-line-mode-map (kbd "C-r") 'consult-history)
@@ -508,15 +431,15 @@ Respond concisely, with code only, without any additional text, prompt or note."
   (evil-define-key 'insert eshell-mode-map (kbd "TAB") 'company-complete)
   :bind
   (:map company-active-map
-				("<return>" . nil)
-				("RET" . nil)
-				("<tab>" . company-complete)
-				("C-s" . consult-completion-at-point)
-				("TAB" . company-complete))
+        ("<return>" . nil)
+        ("RET" . nil)
+        ("<tab>" . company-complete)
+        ("C-s" . consult-completion-at-point)
+        ("TAB" . company-complete))
   (:map evil-insert-state-map
-				("C-c SPC" . company-complete)
-				("C-SPC" . company-complete)
-				("C-@" . company-complete)))
+        ("C-c SPC" . company-complete)
+        ("C-SPC" . company-complete)
+        ("C-@" . company-complete)))
 
 (use-package company-box
   :hook (company-mode . company-box-mode))
@@ -532,6 +455,7 @@ Respond concisely, with code only, without any additional text, prompt or note."
 (use-package smartparens
   :config
   (smartparens-global-mode t))
+
 (use-package rainbow-delimiters
   :hook
   (prog-mode . rainbow-delimiters-mode))
@@ -550,64 +474,37 @@ Respond concisely, with code only, without any additional text, prompt or note."
   ;; This is reserved for embark-act
   (:map global-map ( "M-." . nil)))
 
-(use-package vterm
-  :init
-  (defun vterm/new ()
-    "Create a new vterm buffer."
-    (interactive)
-		(vterm 'N))
-  (defun vterm/project ()
-    "Create a new vterm buffer in project root."
-    (interactive)
-		(let ((default-directory (project-root (project-current))))
-			(vterm 'N)))
-  :custom
-  (vterm-buffer-name-string "vterm %s")
-  :config
-  (push '(vterm/project "VTerm") project-switch-commands)
-  :bind
-  ("C-x / t" . vterm/new)
-  (:map
-    project-prefix-map ("t" . vterm/project)))
+(noop
+ (use-package vterm
+   :init
+   (defun vterm/new ()
+     "Create a new vterm buffer."
+     (interactive)
+     (vterm 'N))
+   (defun vterm/project ()
+     "Create a new vterm buffer in project root."
+     (interactive)
+     (let ((default-directory (project-root (project-current))))
+       (vterm 'N)))
+   :custom
+   (vterm-buffer-name-string "vterm %s")
+   :config
+   (push '(vterm/project "VTerm") project-switch-commands)
+   :bind
+   ("C-x / t" . vterm/new)
+   (:map
+    project-prefix-map ("t" . vterm/project))))
 
-
-;; (use-package minions
-;;   :config
-;;   (minions-mode)
-;;   :custom
-;;   (minions-prominent-modes '(flymake-mode)))
-
-;; (use-package mood-line
-;;   :config
-;;   (mood-line-mode))
-
-;; [(use-package moody)]
-
-;; (use-package doom-modeline
-;;   :config
-;;   (doom-modeline-mode 1))
-
-
-;; (use-package doom-themes
-;;   :ensure t
-;;   :custom
-;;   (doom-themes-enable-bold t)
-;;   (doom-themes-enable-italic t)
-;;   :config
-;;   (load-theme 'doom-one t)
-;;   (doom-themes-visual-bell-config)
-;;   (doom-themes-org-config))
-
-;(load-theme 'modus-vivendi t)
 (use-package eshell
+  :straight nil
   :config
   (defun eshell-append-history ()
     "Call `eshell-write-history' with the `append' parameter set to `t'."
     (when eshell-history-ring
-	(let ((newest-cmd-ring (make-ring 1)))
-	(ring-insert newest-cmd-ring (car (ring-elements eshell-history-ring)))
-	(let ((eshell-history-ring newest-cmd-ring))
-	    (eshell-write-history eshell-history-file-name t)))))
+  (let ((newest-cmd-ring (make-ring 1)))
+  (ring-insert newest-cmd-ring (car (ring-elements eshell-history-ring)))
+  (let ((eshell-history-ring newest-cmd-ring))
+      (eshell-write-history eshell-history-file-name t)))))
 
   (setq eshell-ls-initial-args '("-larth"))
   (defalias 'l 'eshell/ls)
@@ -623,19 +520,13 @@ Respond concisely, with code only, without any additional text, prompt or note."
   ("C-x / e" . eshell/new))
 
 
-;; (use-package prettier
-;;   :hook
-;;   (typescript-ts-mode . prettier-mode)
-;;   (graphql-mode . prettier-mode)
-;;   (json-mode . prettier-mode))
-
-(use-package bash-completion
-  :config
-  (bash-completion-setup))
+;; (use-package bash-completion
+;;   :config
+;;   (bash-completion-setup))
 
 (use-package wgrep)
 (use-package dired
-	:straight nil
+  :straight nil
   :ensure nil
   :config
   (defun dired-copy-file-path-as-kill () (interactive) (dired-copy-filename-as-kill 0))
@@ -692,18 +583,18 @@ Respond concisely, with code only, without any additional text, prompt or note."
 (push (expand-file-name "~/.yarn/bin") exec-path)
 (use-package nvm-switch
   :straight (nvm-switch
-	     :type git
-	     :host github
-	     :repo "tommos0/nvm-switch.el"
-	     :branch "main"))
+             :type git
+             :host github
+             :repo "tommos0/nvm-switch.el"
+             :branch "main"))
 
 
 (use-package jest-ts
   :straight (jest-ts
-	           :type git
+             :type git
              :host github
-	           :repo "tommos0/jest-ts.el"
-	           :branch "master"))
+             :repo "tommos0/jest-ts.el"
+             :branch "master"))
 
 (use-package flymake-eslint
   :config
@@ -713,12 +604,11 @@ Respond concisely, with code only, without any additional text, prompt or note."
   
   (add-hook 'typescript-ts-mode-hook 'flymake-eslint-enable--delayed)
   (add-hook 'tsx-ts-mode-hook 'flymake-eslint-enable--delayed))
-;;(use-package elfeed)
 
 (use-package prettier-js
   :hook
-  ;(typescript-ts-mode . prettier-js-mode)
-  ;(tsx-ts-mode . prettier-js-mode)
+  (typescript-ts-mode . prettier-js-mode)
+  (tsx-ts-mode . prettier-js-mode)
   (graphql-mode . prettier-js-mode)
   (json-mode . prettier-js-mode)
   (js-json-mode . prettier-js-mode)
@@ -731,6 +621,7 @@ Respond concisely, with code only, without any additional text, prompt or note."
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 ;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
+
 ;;;;; Python
 (defun pdbtrack-shell-mode-hook ()
   (add-hook
@@ -752,88 +643,13 @@ Respond concisely, with code only, without any additional text, prompt or note."
   (pymacs-python-command (expand-file-name "~/pymacs/bin/python")))
 
 ;;;;;; Ruff
-(defun ruff-make-file-process (&rest args)
-  "Wrapper for `make-process', but optionally uses a file name handler.
+(use-package ruff-flymake
+  :straight nil
+  :ensure nil
+  :hook
+  (python-ts-mode . ruff-format-on-save-mode)
+  (python-ts-mode . ruff-flymake-mode))
 
-Does for `make-process' what `start-file-process' does for `start-process'."
-  (let ((fh (find-file-name-handler default-directory 'make-process)))
-    (if fh (apply fh 'make-process args)
-      (apply 'make-process args))))
-
-(defun ruff-location-to-pos (l)
-  "Convert Ruff's location L (alist with \"row\" and \"column\") to Emacs POS."
-
-  (save-excursion
-    (goto-char (point-min))
-    (forward-line (1- (let-alist l .row)))
-    (move-to-column (1- (let-alist l .column)))
-    (point)))
-
-(defun ruff-to-flymake-diagnostic (ruff-result)
-  "Convert a single Ruff row RUFF-RESULT to a Flymake diagnostic."
-	(let ((start_pos (ruff-location-to-pos (let-alist ruff-result .location)))
-				(end_pos (ruff-location-to-pos (let-alist ruff-result .end_location))))
-		(flymake-make-diagnostic (current-buffer)
-														 start_pos
-														 end_pos
-														 :error
-														 (format "%s: %s"
-																		 (let-alist ruff-result .code)
-																		 (let-alist ruff-result .message)))))
-
-(defun ruff-report-result-buffer (buffer report-fn)
-  "Handle ruff result in BUFFER.
-
-Parses BUFFER as JSON, converts each row using `ruff-to-flymake-diagnostic',
-then reports them by calling REPORT-FN."
-		(funcall report-fn
-						 (mapcar #'ruff-to-flymake-diagnostic
-										(with-current-buffer buffer (json-read-from-string (buffer-string))))))
-
-(defun ruff-flymake-backend (report-fn &rest _)
-  "Ruff backend for flymake."
-	(unless (buffer-modified-p)
-		(let ((ruff-buffer (generate-new-buffer "*ruff*"))
-					(default-directory (project-root (project-current t)))
-					(file-name (file-local-name (buffer-file-name))))
-			(ruff-make-file-process
-			 :name "ruff"
-			 :buffer ruff-buffer
-			 :command (list "ruff" "check" "--output-format" "json" file-name)
-			 :stderr (get-buffer-create "*ruff-stderr*")
-			 :sentinel (lambda (process _event)
-									 (unless (process-live-p process)
-										 (unwind-protect
-												 (ruff-report-result-buffer ruff-buffer report-fn)
-											 (kill-buffer ruff-buffer))))))))
-
-(define-minor-mode ruff-flymake-mode
-  "Automatically format files with `ruff` on save."
-  :lighter " RuffFM"
-  (if ruff-flymake-mode
-      (add-hook 'flymake-diagnostic-functions #'ruff-flymake-backend nil t)
-    (remove-hook 'flymake-diagnostic-functions #'ruff-flymake-backend t)))
-(defun ruff-format-buffer ()
-  "Format the current buffer with `ruff`."
-  (interactive)
-  (when (buffer-file-name)
-     (save-buffer)
-     (let ((default-directory (if (project-current) (project-root (project-current)) default-directory)))
-       (shell-command-to-string (format "ruff format %s" (shell-quote-argument (buffer-file-name)))))
-       (shell-command-to-string (format "ruff check --fix %s" (shell-quote-argument (buffer-file-name))))
-     (revert-buffer t t t)))
-
-
-(define-minor-mode ruff-format-on-save-mode
-  "Automatically format files with `ruff` on save."
-  :lighter " RuffFmt"
-  (if ruff-format-on-save-mode
-      (add-hook 'after-save-hook #'ruff-format-buffer -10 t)
-    (remove-hook 'after-save-hook #'ruff-format-buffer t)))
-
-(add-hook 'python-ts-mode-hook 'ruff-format-on-save-mode)
-
-(add-hook 'python-ts-mode-hook 'ruff-flymake-mode)
 ;;;;; SQL
 (setq sql-postgres-login-params nil)
 
@@ -856,61 +672,18 @@ then reports them by calling REPORT-FN."
         ;;                                     "/database")))
         ))
 
-
-;(use-package flymake-ruff
-  ;:config
-  ;(setq  flymake-ruff--default-configs nil)
-	;:hook
-  ;(python-mode . flymake-ruff-load)
-  ;(python-ts-mode . flymake-ruff-load))
-
-;; (use-package python-black
-;;    :hook (python-ts-mode . python-black-on-save-mode-enable-dwim))
-
 ;;;;; Common Lisp
 (use-package sly)
-;(use-package lispyville)
 ;;;; Misc
 (defun restart-async-process () (interactive)
        (let* ((current-process (get-buffer-process (current-buffer)))
-							(current-command (car (last (process-command current-process)))))
-				 (kill-process (get-buffer-process (current-buffer)))
-				 (sleep-for .5)
-				 (async-shell-command current-command (current-buffer))))
+              (current-command (car (last (process-command current-process)))))
+         (kill-process (get-buffer-process (current-buffer)))
+         (sleep-for .5)
+         (async-shell-command current-command (current-buffer))))
 
 
 ;;;; Scratch area
-(defun my/auto-format ()
-  (interactive)
-  (when default-directory
-    (set-process-sentinel
-     (start-process "prettier" "prettier" "yarn" "prettier" "-w" (buffer-file-name))
-     (lambda (p _)
-       (when (= 0 (process-exit-status p))
-         (start-process "eslint-fix" "eslint" "yarn" "eslint" "--fix" (buffer-file-name)))))))
-
-(defvar project-start-command)
-
-(put 'project-start-command 'safe-local-variable
-     (lambda (x) t))
-
-(defun project-start ()
-  (interactive)
-  (when project-start-command
-    (let ((buffer-name (concat "Run *" (project-name (project-current)) "*")))
-      ;; if the buffer doesn't exist, run the command
-      (if (get-buffer buffer-name)
-	(switch-to-buffer buffer-name)
-	(let ((default-directory (project-root (project-current))))
-	  (async-shell-command project-start-command buffer-name))))))
-
-(bind-key "<f5>" #'project-start)
-
-(defun my-reload-dir-locals-for-current-buffer ()
-  "reload dir locals for the current buffer"
-  (interactive)
-  (let ((enable-local-variables :all))
-    (hack-dir-local-variables-non-file-buffer)))
 
 (defun open-in-vscode ()
   (interactive)
@@ -921,15 +694,6 @@ then reports them by calling REPORT-FN."
     (start-process "code" nil "/usr/bin/code" "--goto" filestr)))
 
 
-(defun insert-shell-command-as-comment (command)
-  (interactive)
-  (save-excursion
-    (end-of-line)
-    (let* ((output (shell-command-to-string command))
-	  (commented-string (concat "\n;; " (replace-regexp-in-string "\n" "\n;; " output))))
-      (insert commented-string))))
-
-
 ;; (defvar org-auto-redisplay-after-eval t)
 ;; (defun org-redisplay-when-auto-redisplay ()
 ;;   "Redisplay when `org-auto-redisplay-after-eval' is non-nil."
@@ -937,7 +701,7 @@ then reports them by calling REPORT-FN."
 ;;     (org-redisplay-inline-images)))
 
 ;; (advice-add 'org-babel-execute-src-block
-;; 	    :after 'org-redisplay-when-auto-redisplay)
+;;       :after 'org-redisplay-when-auto-redisplay)
 
 (defun advice-unadvice (sym)
   "Remove all advices from symbol SYM."
@@ -945,10 +709,9 @@ then reports them by calling REPORT-FN."
   (advice-mapc (lambda (advice _props) (advice-remove sym advice))
                sym))
 
-;(setq-default indent-tabs-mode nil)
 (use-package
-	eat
-	:straight
+  eat
+  :straight
  '(eat :type git
        :host codeberg
        :repo "akib/emacs-eat"
@@ -967,35 +730,31 @@ then reports them by calling REPORT-FN."
  (eshell-mode . eat-eshell-mode)
  :bind
  (:map eat-line-mode-map
-			 ("C-k" . eat-previous-shell-prompt)
-			 ("C-j" . eat-next-shell-prompt)))
+       ("C-k" . eat-previous-shell-prompt)
+       ("C-j" . eat-next-shell-prompt)))
 
 (defun cleanup-windows-paste ()
-	"When pasting through a terminal from windows, you'd expect CRLF endings,
+  "When pasting through a terminal from windows, you'd expect CRLF endings,
 But I'm seeing CRHTCR (\\n\\t\\n).
 This command changes that sequence to just one line break."
-	(interactive)
-	(query-replace-regexp "\n\t\n" "\n" nil (point-min) (point-max)))
+  (interactive)
+  (query-replace-regexp "\n\t\n" "\n" nil (point-min) (point-max)))
 
 (defun unlock-gpg-key ()
-	"Unlock GPG key."
-	(interactive)
-	(async-shell-command "gpg --sign --dry-run /dev/null"))
+  "Unlock GPG key."
+  (interactive)
+  (async-shell-command "gpg --sign --dry-run /dev/null"))
 
-(defun previous-line-same-indent ()
-    "Go to the first line above the cursor where the indentation is less than the current line."
-    (interactive "^")
-		(evil-set-jump)
-    (let ((original-indent (current-indentation)))
-        (while (and (>= (current-indentation) original-indent)
-                    (not (bobp)))  ;; Not beginning of the buffer
-          (previous-line))
-				(evil-first-non-blank)))
+(noop
+ (defun previous-line-same-indent ()
+   "Go to the first line above the cursor where the indentation is less than the current line."
+   (interactive "^")
+   (evil-set-jump)
+   (let ((original-indent (current-indentation)))
+     (while (and (>= (current-indentation) original-indent)
+                 (not (bobp))) ;; Not beginning of the buffer
+       (previous-line))
+     (evil-first-non-blank))))
 
-(use-package evil-textobj-tree-sitter
-	:config
-	(define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-	(define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
-	(define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj ("conditional.outer" "loop.outer"))))
 ;;; init.el ends here
 

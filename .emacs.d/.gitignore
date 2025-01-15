@@ -6,3 +6,5 @@
 !lisp
 !lisp/*
 lisp/private.el
+!snippets
+!snippets/**/*

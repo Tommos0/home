@@ -67,6 +67,23 @@ then reports them by calling REPORT-FN."
       (add-hook 'flymake-diagnostic-functions #'ruff-flymake-backend nil t)
     (remove-hook 'flymake-diagnostic-functions #'ruff-flymake-backend t)))
 
+(defun ruff-format-buffer ()
+  "Format the current buffer with `ruff`."
+  (interactive)
+  (when (buffer-file-name)
+     (save-buffer)
+     (let ((default-directory (if (project-current) (project-root (project-current)) default-directory)))
+       (shell-command-to-string (format "ruff format %s" (shell-quote-argument (buffer-file-name)))))
+       (shell-command-to-string (format "ruff check --fix %s" (shell-quote-argument (buffer-file-name))))
+     (revert-buffer t t t)))
+
+(define-minor-mode ruff-format-on-save-mode
+  "Automatically format files with `ruff` on save."
+  :lighter " RuffFmt"
+  (if ruff-format-on-save-mode
+      (add-hook 'after-save-hook #'ruff-format-buffer -10 t)
+    (remove-hook 'after-save-hook #'ruff-format-buffer t)))
+
 (provide 'ruff-flymake)
 
 ;;; ruff-flymake.el ends here
