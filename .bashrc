@@ -3,7 +3,7 @@
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
-	 . /etc/bashrc
+   . /etc/bashrc
 fi
 
 set_emacs_additions() {
@@ -58,7 +58,7 @@ set_prompt() {
 
 
 set_aliases() {
-		alias ls="ls --color=auto"
+    alias ls="ls --color=auto"
     alias cp="cp -i"                          # confirm before overwriting something
     alias ln="ln -i"                          # confirm before overwriting something
     alias df='df -h'                          # human-readable sizes
@@ -127,23 +127,23 @@ set_misc() {
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-		# GUIX
-		if [ -n "$GUIX_ENVIRONMENT" ]; then
-				if [[ $PS1 =~ (.*)"\\$" ]]; then
-						PS1="${BASH_REMATCH[1]} [env]\\\$ "
-				fi
-		fi
+    # GUIX
+    if [ -n "$GUIX_ENVIRONMENT" ]; then
+        if [[ $PS1 =~ (.*)"\\$" ]]; then
+            PS1="${BASH_REMATCH[1]} [env]\\\$ "
+        fi
+    fi
 
-		# VCPKG
-		VCPKG_ROOT=~/git/vcpkg
-		[ -d "$VCPKG_ROOT" ] && export PATH="$VCPKG_ROOT:$PATH"
+    # VCPKG
+    VCPKG_ROOT=~/git/vcpkg
+    [ -d "$VCPKG_ROOT" ] && export PATH="$VCPKG_ROOT:$PATH"
 
-		# PyEnv
-		export PYENV_ROOT="$HOME/.pyenv"
-		[ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH" && eval "$(pyenv init -)"
+    # PyEnv
+    export PYENV_ROOT="$HOME/.pyenv"
+    [ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH" && eval "$(pyenv init -)"
 
-		# DirEnv
-		command -v direnv &> /dev/null && eval "$(direnv hook bash)"
+    # DirEnv
+    command -v direnv &> /dev/null && eval "$(direnv hook bash)"
 }
 
 set_prompt
