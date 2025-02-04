@@ -761,5 +761,14 @@ This command changes that sequence to just one line break."
        (previous-line))
      (evil-first-non-blank))))
 
+(use-package bm-bookmarks
+  :straight nil
+  :ensure nil
+  :custom
+  (bm-default-action #'kill-new)
+  :config
+  (evil-define-key 'normal 'global (kbd "<leader>bl") 'bm-search-bookmarks)
+  (evil-define-key 'normal 'global (kbd "<leader>bs") 'bm-save-bookmark))
+
 ;;; init.el ends here
 
