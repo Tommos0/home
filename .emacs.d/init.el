@@ -24,10 +24,6 @@
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-(condition-case nil
-    (load "private")
-  (file-error (message "No private.el found")))
-
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 (load custom-file)
 ;;;; Straight package manager
@@ -238,6 +234,7 @@
   :bind
   (:map org-mode-map ("TAB" . org-cycle))
   :config
+  (require 'org-tempo)
   (evil-define-key 'motion org-mode-map "TAB" nil)
   (with-eval-after-load 'evil-maps (define-key evil-motion-state-map (kbd "TAB") nil))
   (setq org-startup-indented t))
@@ -298,7 +295,9 @@
              :type git
              :host github
              :repo "karthink/gptel"
-             :branch "master"))
+             :branch "master")
+  :custom
+  (gptel-default-mode 'org-mode))
 
 ;;;; Packages
 (use-package recentf
@@ -769,6 +768,10 @@ This command changes that sequence to just one line break."
   :config
   (evil-define-key 'normal 'global (kbd "<leader>bl") 'bm-search-bookmarks)
   (evil-define-key 'normal 'global (kbd "<leader>bs") 'bm-save-bookmark))
+
+(condition-case nil
+    (load "private")
+  (file-error (message "No private.el found")))
 
 ;;; init.el ends here
 
