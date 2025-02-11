@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: eslint-disable
+# key: eld
+# --
+/* eslint-disable ${$$(yas-choose-value '("@typescript-eslint/no-explicit-any"))} */

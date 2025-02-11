@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: eslint-disable-next-line
+# key: eld
+# --
+// eslint-disable-next-line ${$$(yas-choose-value '("@typescript-eslint/no-explicit-any"))}
