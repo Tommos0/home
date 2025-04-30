@@ -118,7 +118,7 @@
   :custom-face
   (highlight ((t (:background "#4e463f"))))
   (error ((t (:foreground nil :background "#660000" :underline t))))
-  (warning ((t (:foreground nil :background "#793101" :underline t))))
+  (warning ((t (:foreground nil :background "#444" :underline nil :weight normal))))
   (default ((t (:background "#282828"))))
   (match ((t (:background "darkorange"))))
   (auto-dim-other-buffers ((t (:background "#1e1e1e"))))
@@ -324,6 +324,7 @@
   :custom
   (eglot-confirm-server-initiated-edits nil)
   (eglot-events-buffer-size 0)
+  (eglot-code-action-indicator "A")
   :config
   ;; https://github.com/joaotavora/eglot/issues/268#issuecomment-544890756
   (setq eglot-stay-out-of '(flymake))
@@ -654,6 +655,13 @@
   (python-ts-mode . ruff-format-on-save-mode)
   (python-ts-mode . ruff-flymake-mode))
 
+(defun my-disable-flymake-for-python-packages ()
+  "Disable flymake for python site-packages or any specific dictionary."
+  (when (string-match-p "/site-packages/" buffer-file-name)
+    (flymake-mode -1)))
+
+(add-hook 'python-ts-mode-hook 'my-disable-flymake-for-python-packages)
+
 ;;;;; SQL
 (setq sql-postgres-login-params nil)
 
@@ -773,5 +781,65 @@ This command changes that sequence to just one line break."
     (load "private")
   (file-error (message "No private.el found")))
 
+(defun compare-with-kill-ring ()
+  "Compare current selection with the most recent kill ring entry."
+  (interactive)
+  (if (use-region-p)
+      (let* ((entry (car kill-ring))
+            (selection (buffer-substring (region-beginning) (region-end)))
+            (diff-buf (get-buffer-create "*Diff*")))
+        (with-current-buffer diff-buf
+          (erase-buffer)
+          (insert (diff-no-select entry selection nil 'noasync)))
+        (pop-to-buffer diff-buf))
+    (message "No region selected")))
+
+(defun kill-deepest-child-process (signal)
+  "Kill the deepest child process of the current buffer's process with SIGNAL.
+Interactively, ask for the signal to send. Common signals are:
+TERM (terminate), KILL (force kill), INT (interrupt), HUP (hang up)."
+  (interactive
+   (list (completing-read "Signal to send: "
+                         '("TERM" "KILL" "INT" "HUP" "USR1" "USR2")
+                         nil t)))
+  (let ((proc (get-buffer-process (current-buffer))))
+    (if proc
+        (let* ((pid (process-id proc))
+               (deepest-pid (find-deepest-child-process pid)))
+          (if deepest-pid
+              (progn
+                (signal-process deepest-pid (intern (concat "SIG" signal)))
+                (message "Sent SIG%s to process %d" signal deepest-pid))
+            (message "No child processes found")))
+      (message "No process associated with this buffer"))))
+
+(defun find-deepest-child-process (parent-pid)
+  "Find the deepest child process of PARENT-PID."
+  (let ((direct-children (get-direct-children parent-pid))
+        deepest-pid)
+    (if direct-children
+        (progn
+          (setq deepest-pid (car direct-children))
+          (dolist (child direct-children)
+            (let ((child-result (find-deepest-child-process child)))
+              (when child-result
+                (setq deepest-pid child-result)))))
+      (setq deepest-pid parent-pid))
+    (if (= deepest-pid parent-pid)
+        nil
+      deepest-pid)))
+
+(defun get-direct-children (parent-pid)
+  "Get direct child PIDs of PARENT-PID."
+  (let (children)
+    (dolist (pid (list-system-processes))
+      (let ((attrs (process-attributes pid)))
+        (when (and attrs (= (cdr (assoc 'ppid attrs)) parent-pid))
+          (push pid children))))
+    children))
+
+(use-package evil-indent-plus
+  :config
+  (evil-indent-plus-default-bindings))
 ;;; init.el ends here
 

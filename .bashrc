@@ -144,6 +144,14 @@ set_misc() {
 
     # DirEnv
     command -v direnv &> /dev/null && eval "$(direnv hook bash)"
+
+    # pnpm
+    export PNPM_HOME="$HOME/.local/share/pnpm"
+    case ":$PATH:" in
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+
 }
 
 set_prompt
@@ -152,3 +160,4 @@ set_history
 set_completion
 set_misc
 set_emacs_additions
+

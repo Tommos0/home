@@ -15,4 +15,5 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(diff-refine-added ((t (:background "#8f8800" :foreground "#ffdfaf"))))
- '(error ((t (:underline t)))))
+ '(error ((t (:underline t))))
+ '(warning ((t (:background "brightblack" :underline t :weight bold)))))

@@ -1,5 +1,0 @@
-# -*- mode: snippet; require-final-newline: nil -*-
-# name: setState
-# key: us
-# --
-const [$1, set${1:$(s-upper-camel-case yas-text)}] = useState<$2>($3);
