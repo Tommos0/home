@@ -103,7 +103,6 @@
 (setq-default css-indent-offset 2)
 (setq async-shell-command-buffer 'new-buffer)
 (add-hook 'prog-mode-hook 'hs-minor-mode)
-(use-package project)
 ;;;; Terminal optimizations
 (use-package evil-terminal-cursor-changer
   :config
@@ -346,17 +345,18 @@
   ;; (graphql-mode . eglot-ensure)
   )
 
-(use-package eglot-booster
-  ;https://github.com/jdtsmith/eglot-booster
-  :straight (eglot-booster
-             :type git
-             :host github
-             :repo "jdtsmith/eglot-booster"
-             :branch "main")
-  :after eglot
-  :config (eglot-booster-mode))
+;; (use-package eglot-booster
+;;   ;https://github.com/jdtsmith/eglot-booster
+;;   :straight (eglot-booster
+;;              :type git
+;;              :host github
+;;              :repo "jdtsmith/eglot-booster"
+;;              :branch "main")
+;;   :after eglot
+;;   :config (eglot-booster-mode))
 
 (use-package flymake
+  :straight nil
   :ensure nil
   :bind
   (:map flymake-mode-map
@@ -724,26 +724,28 @@
 (use-package
   eat
   :straight
- '(eat :type git
-       :host codeberg
-       :repo "akib/emacs-eat"
-       :files ("*.el" ("term" "term/*.el") "*.texi"
-               "*.ti" ("terminfo/e" "terminfo/e/*")
-               ("terminfo/65" "terminfo/65/*")
-               ("integration" "integration/*")
-               (:exclude ".dir-locals.el" "*-tests.el")))
- :config
- (push '(eat-mode eat--line-input-ring eat--line-input-ring-index comint-bol) consult-mode-histories)
- (evil-define-key 'insert eat-line-mode-map (kbd "C-p") 'eat-line-previous-input)
- (evil-define-key 'insert eat-line-mode-map (kbd "C-n") 'eat-line-next-input)
- (setq eat-enable-auto-line-mode t)
- :hook
- (eat-eshell-mode . (lambda () (setq-local eshell-visual-commands nil)))
- (eshell-mode . eat-eshell-mode)
- :bind
- (:map eat-line-mode-map
-       ("C-k" . eat-previous-shell-prompt)
-       ("C-j" . eat-next-shell-prompt)))
+  '(eat :type git
+        :host codeberg
+        :repo "akib/emacs-eat"
+        :files ("*.el" ("term" "term/*.el") "*.texi"
+                "*.ti" ("terminfo/e" "terminfo/e/*")
+                ("terminfo/65" "terminfo/65/*")
+                ("integration" "integration/*")
+                (:exclude ".dir-locals.el" "*-tests.el")))
+  :config
+  (push '(eat-mode eat--line-input-ring eat--line-input-ring-index comint-bol) consult-mode-histories)
+  (evil-define-key 'insert eat-line-mode-map (kbd "C-p") 'eat-line-previous-input)
+  (evil-define-key 'insert eat-line-mode-map (kbd "C-n") 'eat-line-next-input)
+  (setq eat-enable-auto-line-mode t)
+  ;; (add-to-list 'project-switch-commands
+  ;;              '(eat-project "Eat Shell" ?t) t)
+  :hook
+  (eat-eshell-mode . (lambda () (setq-local eshell-visual-commands nil)))
+  (eshell-mode . eat-eshell-mode)
+  :bind
+  (:map eat-line-mode-map
+        ("C-k" . eat-previous-shell-prompt)
+        ("C-j" . eat-next-shell-prompt)))
 
 (defun cleanup-windows-paste ()
   "When pasting through a terminal from windows, you'd expect CRLF endings.
@@ -841,5 +843,17 @@ TERM (terminate), KILL (force kill), INT (interrupt), HUP (hang up)."
 (use-package evil-indent-plus
   :config
   (evil-indent-plus-default-bindings))
-;;; init.el ends here
+
+(use-package vline
+  :custom
+  (vline-face 'hl-line))
+
+(use-package dape)
+(use-package treemacs)
+(use-package dashboard
+  :config
+  (setq dashboard-items '((projects . 8) (recents . 10) (bookmarks . 5))))
+
+;; init.el ends here
+
 
