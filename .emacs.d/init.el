@@ -101,6 +101,7 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 (setq-default css-indent-offset 2)
+(setq enable-recursive-minibuffers t)
 (setq async-shell-command-buffer 'new-buffer)
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 ;;;; Terminal optimizations
@@ -116,14 +117,24 @@
 (use-package gruvbox-theme
   :custom-face
   (highlight ((t (:background "#4e463f"))))
-  (error ((t (:foreground nil :background "#660000" :underline t))))
-  (warning ((t (:foreground nil :background "#444" :underline nil :weight normal))))
   (default ((t (:background "#282828"))))
   (match ((t (:background "darkorange"))))
-  (auto-dim-other-buffers ((t (:background "#1e1e1e"))))
-  (auto-dim-other-buffers-hide ((t (:background "#1e1e1e"))))
   :init
-  (load-theme 'gruvbox-dark-medium t))
+  (load-theme 'gruvbox-dark-medium t)
+  :config
+  (set-face-attribute 'auto-dim-other-buffers nil :background "#1e1e1e")
+  (set-face-attribute 'auto-dim-other-buffers-hide nil :background "#1e1e1e")
+  (set-face-attribute 'error nil
+                    :foreground nil
+                    :background "#5f0000"
+                    :underline nil
+                    :weight 'normal)
+  (set-face-attribute 'warning nil
+                    :foreground nil
+                    ;; :background "#00005f"
+                    :background nil
+                    :underline t
+                    :weight 'normal))
 
 ;;(set-face-attribute 'default nil :family "Liberation Mono" :height 96)
 ;;(set-face-attribute 'default nil :family "Fira Code" :height 105)
@@ -324,6 +335,13 @@
   (eglot-confirm-server-initiated-edits nil)
   (eglot-events-buffer-size 0)
   (eglot-code-action-indicator "A")
+  :bind
+  (:map eglot-mode-map ("C-c a" . eglot-code-actions))
+  :hook
+  (tsx-ts-mode . eglot-ensure)
+  (typescript-ts-mode . eglot-ensure)
+  (python-ts-mode . eglot-ensure)
+  ;; (graphql-mode . eglot-ensure)
   :config
   ;; https://github.com/joaotavora/eglot/issues/268#issuecomment-544890756
   (setq eglot-stay-out-of '(flymake))
@@ -336,13 +354,41 @@
   ;;                                       ("deno" "lsp" :initializationOptions (:enable t :lint t))))))
 
   ;;(setq eglot-events-buffer-size 400000000)
-  :bind
-  (:map eglot-mode-map ("C-c a" . eglot-code-actions))
-  :hook
-  (tsx-ts-mode . eglot-ensure)
-  (typescript-ts-mode . eglot-ensure)
-  (python-ts-mode . eglot-ensure)
-  ;; (graphql-mode . eglot-ensure)
+
+  (defvar rb--eldoc-html-patterns
+    '(("&nbsp;" " ")
+      ("&lt;" "<")
+      ("&gt;" ">")
+      ("&amp;" "&")
+      ("&quot;" "\"")
+      ("&apos;" "'"))
+    "List of (PATTERN . REPLACEMENT) to replace in eldoc output.")
+
+  (defun rb--string-replace-all (patterns in-string)
+    "Replace all cars from PATTERNS in IN-STRING with their pair."
+    (mapc (lambda (pattern-pair)
+            (setq in-string
+                  (string-replace (car pattern-pair) (cadr pattern-pair) in-string)))
+          patterns)
+    in-string)
+
+  (defun rb--eldoc-preprocess (orig-fun &rest args)
+    "Preprocess the docs to be displayed by eldoc to replace HTML escapes."
+    (let ((doc (car args)))
+      ;; The first argument is a list of (STRING :KEY VALUE ...) entries
+      ;; we replace the text in each such string
+      ;; see docstring of `eldoc-display-functions'
+      (when (listp doc)
+        (setq doc (mapcar
+                   (lambda (doc) (cons
+                             (rb--string-replace-all rb--eldoc-html-patterns (car doc))
+                             (cdr doc)))
+                   doc
+                   ))
+        )
+      (apply orig-fun (cons doc (cdr args)))))
+
+  (advice-add 'eldoc-display-in-buffer :around #'rb--eldoc-preprocess)
   )
 
 ;; (use-package eglot-booster
@@ -857,3 +903,25 @@ TERM (terminate), KILL (force kill), INT (interrupt), HUP (hang up)."
 ;; init.el ends here
 
 
+
+(defun send-region-to-eat (start end)
+  "Send region between START and END to the first visible EAT terminal in current frame."
+  (interactive "r")
+  (let ((text (buffer-substring-no-properties start end))
+        (eat-buffer nil))
+    ;; Find first visible EAT buffer in current frame
+    (dolist (window (window-list))
+      (let ((buffer (window-buffer window)))
+        (when (and (not eat-buffer)
+                   (with-current-buffer buffer
+                     (and (derived-mode-p 'eat-mode)
+                          (boundp 'eat-terminal))))
+          (setq eat-buffer buffer))))
+    ;; Send text if an EAT buffer was found
+    (if eat-buffer
+        (with-current-buffer eat-buffer
+          (eat-term-send-string eat-terminal (concat text "\n"))
+          (message "Sent region to %s" (buffer-name eat-buffer)))
+      (message "No visible EAT terminal found in current frame"))))
+
+(global-set-key (kbd "C-c d") 'send-region-to-eat)
