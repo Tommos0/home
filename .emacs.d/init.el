@@ -122,19 +122,22 @@
   :init
   (load-theme 'gruvbox-dark-medium t)
   :config
-  (set-face-attribute 'auto-dim-other-buffers nil :background "#1e1e1e")
-  (set-face-attribute 'auto-dim-other-buffers-hide nil :background "#1e1e1e")
-  (set-face-attribute 'error nil
-                    :foreground nil
-                    :background "#5f0000"
-                    :underline nil
-                    :weight 'normal)
-  (set-face-attribute 'warning nil
-                    :foreground nil
-                    ;; :background "#00005f"
-                    :background nil
-                    :underline t
-                    :weight 'normal))
+  (defun fix-faces () (interactive)
+         (set-face-attribute 'auto-dim-other-buffers nil :background "#1e1e1e")
+         (set-face-attribute 'auto-dim-other-buffers-hide nil :background "#1e1e1e")
+         (set-face-attribute 'error nil
+                             :foreground nil
+                             :background "#5f0000"
+                             :underline nil
+                             :weight 'normal)
+         (set-face-attribute 'warning nil
+                             :foreground nil
+                             ;; :background "#00005f"
+                             :background nil
+                             :underline t
+                             :weight 'normal)
+         )
+  (fix-faces))
 
 ;;(set-face-attribute 'default nil :family "Liberation Mono" :height 96)
 ;;(set-face-attribute 'default nil :family "Fira Code" :height 105)
