@@ -331,6 +331,15 @@
   :config
   (yas-global-mode t))
 
+(use-package lsp-mode
+  :disabled
+  :config
+  (add-to-list 'lsp-language-id-configuration '(python-ts-mode . "python"))
+  (lsp-register-client (make-lsp-client
+                      :new-connection (lsp-stdio-connection '("pyright-langserver" "--stdio"))
+                      :activation-fn (lsp-activate-on "python")
+                      :server-id 'pyls)))
+
 (use-package eglot
   :straight nil
   :ensure nil
@@ -926,5 +935,19 @@ TERM (terminate), KILL (force kill), INT (interrupt), HUP (hang up)."
           (eat-term-send-string eat-terminal (concat text "\n"))
           (message "Sent region to %s" (buffer-name eat-buffer)))
       (message "No visible EAT terminal found in current frame"))))
+
+(use-package nerd-icons)
+(use-package nerd-icons-dired
+  :config
+  (nerd-icons-dired-mode t))
+(use-package nerd-icons-ibuffer
+  :config
+  (nerd-icons-ibuffer-mode t))
+(use-package nerd-icons-completion
+  :config
+  (nerd-icons-completion-mode t))
+(use-package doom-modeline
+  :config
+  (doom-modeline-mode t))
 
 (global-set-key (kbd "C-c d") 'send-region-to-eat)
